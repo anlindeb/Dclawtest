@@ -2,70 +2,87 @@
 
 A small character-level Transformer language model built from scratch with PyTorch.
 
+## Two Variants
+
+| | **NemoGPT (Tiny)** | **NemoGPT Shakespeare** |
+|---|---|---|
+| Dataset | Custom prose (91K chars) | Shakespeare (1.1M chars) |
+| Layers | 2 | 3 |
+| Heads | 4 | 4 |
+| Embed Dim | 48 | 64 |
+| Context | 64 | 64 |
+| Parameters | 63,595 | 161,985 |
+| Training Steps | 2,000 | 3,000 |
+| Final Val Loss | 0.16 | 2.07 |
+| Training Time | ~80s (CPU) | ~3 min (CPU) |
+| Checkpoint | `checkpoints/nemogpt.pt` | `checkpoints/nemogpt_shakespeare.pt` |
+
 ## Architecture
 
-| Component | Value |
-|-----------|-------|
-| Layers | 2 |
-| Attention Heads | 4 |
-| Embedding Dim | 48 |
-| Context Window | 64 tokens |
-| Parameters | 63,595 |
-| Dropout | 0.1 |
+Pure GPT-style Transformer with no high-level abstractions:
 
-## How It Works
+- **Token + Positional Embeddings** — characters embedded with position info
+- **Multi-Head Causal Self-Attention** — masked so tokens only attend to past
+- **Feed-Forward Networks** — 4x expansion with GELU activation
+- **LayerNorm + Residual Connections** — pre-norm with skip connections
+- **Autoregressive Generation** — predicts next character given context
 
-NemoGPT is a minimal GPT-style language model that learns to generate text one character at a time. It uses:
-
-- **Token + Positional Embeddings** — characters get embedded with position info
-- **Multi-Head Self-Attention** — each head learns different relationships between characters
-- **Feed-Forward Networks** — per-position MLPs with GELU activation
-- **LayerNorm + Residual Connections** — stable training with skip connections
-- **Autoregressive Generation** — predicts next character given previous context
-
-## Training
-
-Trained on a small corpus of ~91K characters (English prose about coding, ML, and the deep sea). CPU-only, ~80 seconds for 2,000 steps.
-
-```
-Step     0 | train 3.6308 | val 3.6336
-Step   500 | train 1.3192 | val 1.3208
-Step  1000 | train 0.3405 | val 0.3311
-Step  1500 | train 0.2034 | val 0.1960
-Step  1999 | train 0.1551 | val 0.1589
-```
-
-## Sample Output
+## Shakespeare Sample Output
 
 **Conservative (temp=0.5):**
 ```
-sequences to complex grammatical structures.
-A neural network is a function approximator. Give it enough data and
-parameters, and it can learn almost any mapping from inputs to outputs.
-But small models have their charm too. They train fast, run on modest
-hardware, and teach us t
+And be the macke ing of his that the are wear
+The are he mathe have ast my proter of thear.
+
+SICHARDWARDD IE:
+Whith to the may be that come to houst my of his the'd the so the buther
+on the the you the whe beare sliest a and so mangely to an his paitere and
+Willl be the to the whose may for the sart this sour a so the foress.
 ```
 
 **Creative (temp=0.8):**
 ```
-Helo, world! The first program anyone writes. A simple greeting to the
-darkness. Bioluminescence lights up the abyss. Nemo explores the depths,
-searching for treasures hidden in the code of the dep sea.
+Buth chimerly cut lie, peeces you to the bee have
+And he den whe you to paue the the whore giithters?
+
+MUNUCICjATENUS:
+Wit sou
+What broud hing but oinds sillle tage you me afthis old
+Hos low me that hem iths or me your mourt
 ```
 
 **Wild (temp=1.2):**
 ```
-A neural network is a function approgram anivatioas a a cor. Thever.
-It worites and like clockwork. That is the way.
+Man: misiguday.
+MANRIIO:
+He mallaw, geee. Recomidy, thoumbatht wore
+Uproncome'r ew batrah, you ball broy;
+Ance have say. I conesbeeregs.
+```
+
+The model has learned Shakespeare's structure — dialogue format, character names, iambic-ish rhythm — but with creative spelling at this scale. A 10x bigger model would produce near-convincing Shakespeare.
+
+## Training Curves
+
+**Shakespeare model:**
+```
+Step     0 | train 4.0894 | val 4.0903
+Step   500 | train 2.4995 | val 2.5015
+Step  1000 | train 2.3544 | val 2.3506
+Step  1500 | train 2.2675 | val 2.2424
+Step  2000 | train 2.1419 | val 2.1710
+Step  2500 | train 2.0697 | val 2.1247
+Step  2999 | train 1.9900 | val 2.0730
 ```
 
 ## Usage
 
 ```bash
-# Train from scratch
+# Train the tiny model
 python3 nemogpt.py
 
-# Model checkpoint saved to checkpoints/nemogpt.pt
+# Train on Shakespeare (download data automatically)
+python3 nemogpt_shakespeare.py
 ```
 
 ## Dependencies
